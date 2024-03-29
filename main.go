@@ -26,13 +26,14 @@ func main() {
 	gin.SetMode(setting.ServerSetting.RunMode)
 	handler := gin.Default()
 
-	handler.GET("/ping", func(c *gin.Context) {
+	handler.GET("/api/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
 		})
 	})
 
-	handler.POST("/generate", controller.Generate)
+	handler.POST("/api/generate", controller.Generate)
+	handler.GET("/:urlHash", controller.GetUrl)
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%v", setting.ServerSetting.HttpPort),

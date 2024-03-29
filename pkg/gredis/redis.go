@@ -97,11 +97,16 @@ func Exists(key string) bool {
 }
 
 // Get get a key
-func Get(key string) ([]byte, error) {
+func Get(key string, dataStruct interface{}) ([]byte, error) {
 	conn := RedisConn.Get()
 	defer conn.Close()
 
 	reply, err := redis.Bytes(conn.Do("GET", key))
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(reply, dataStruct)
+
 	if err != nil {
 		return nil, err
 	}

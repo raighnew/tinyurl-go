@@ -13,6 +13,7 @@ type Server struct {
 	Environment  string `env:"Environment" envDefault:"test"`
 	RunMode      string `env:"RUN_MODE" envDefault:"debug"`
 	HttpPort     int    `env:"PORT" envDefault:"8081"`
+	BaseUrl      string `env:"BASE_URL" envDefault:"http://localhost:8081/"`
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
 }
