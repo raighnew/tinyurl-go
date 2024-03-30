@@ -5,6 +5,7 @@ go 1.22.1
 require (
 	github.com/beego/beego/v2 v2.1.6
 	github.com/caarlos0/env/v10 v10.0.0
+	github.com/fvbock/endless v0.0.0-20170109170031-447134032cb6
 	github.com/gin-gonic/gin v1.9.1
 	github.com/gomodule/redigo v2.0.1-0.20180401191855-9352ab68be13+incompatible
 	github.com/joho/godotenv v1.5.1

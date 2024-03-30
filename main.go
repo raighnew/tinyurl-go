@@ -1,20 +1,16 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
-	"net/http"
-	"os"
-	"os/signal"
 	"syscall"
-	"time"
 
+	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
 
-	"github.com/raighneweng/tinyurl-go/controller"
 	"github.com/raighneweng/tinyurl-go/pkg/gredis"
 	"github.com/raighneweng/tinyurl-go/pkg/setting"
+	"github.com/raighneweng/tinyurl-go/routers"
 )
 
 func init() {
@@ -24,56 +20,28 @@ func init() {
 
 func main() {
 	gin.SetMode(setting.ServerSetting.RunMode)
-	handler := gin.Default()
 
-	handler.GET("/api/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
+	routersInit := routers.InitRouter()
 
-	handler.POST("/api/generate", controller.Generate)
-	handler.GET("/:urlHash", controller.GetUrl)
+	readTimeout := setting.ServerSetting.ReadTimeout
+	writeTimeout := setting.ServerSetting.WriteTimeout
+	maxHeaderBytes := 1 << 20
 
-	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%v", setting.ServerSetting.HttpPort),
-		Handler: handler,
+	log.Printf("listen and serve on 0.0.0.0:%v", setting.ServerSetting.HttpPort)
+
+	// If you want Graceful Restart, you need a Unix system and download github.com/fvbock/endless
+	endless.DefaultReadTimeOut = readTimeout
+	endless.DefaultWriteTimeOut = writeTimeout
+	endless.DefaultMaxHeaderBytes = maxHeaderBytes
+
+	server := endless.NewServer(fmt.Sprintf(":%v", setting.ServerSetting.HttpPort), routersInit)
+
+	server.BeforeBegin = func(add string) {
+		log.Printf("Actual pid is %d", syscall.Getpid())
 	}
 
-	go func() {
-		// service connections
-		log.Printf("listen and serve on 0.0.0.0:%v", setting.ServerSetting.HttpPort)
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
-		}
-	}()
-
-	// Wait for interrupt signal to gracefully shutdown the server with
-	// a timeout of 5 seconds.
-	quit := make(chan os.Signal)
-	// kill (no param) default send syscanll.SIGTERM
-	// kill -2 is syscall.SIGINT
-	// kill -9 is syscall. SIGKILL but can"t be catch, so don't need add it
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-	log.Println("Shutdown Server ...")
-
-	defaultTimeout := time.Second
-
-	if setting.ServerSetting.Environment == "Production" {
-		defaultTimeout = 10 * time.Second
+	err := server.ListenAndServe()
+	if err != nil {
+		log.Printf("Server err: %v", err)
 	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
-	defer cancel()
-	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatal("Server Shutdown:", err)
-	}
-	// catching ctx.Done(). timeout of 10 seconds.
-	select {
-	case <-ctx.Done():
-		log.Println("timeout of 10 seconds.")
-	}
-
-	log.Println("Server exiting")
 }

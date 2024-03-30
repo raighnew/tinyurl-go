@@ -1,4 +1,4 @@
-package controller
+package api
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ type TinyUrlBody struct {
 	Url string `json:"url" form:"url" valid:"Required;MaxSize(100)"`
 }
 
-func Generate(c *gin.Context) {
+func GenerateShortURL(c *gin.Context) {
 	var (
 		appG    = app.Gin{C: c}
 		uParams TinyUrlBody
@@ -55,7 +55,7 @@ func Generate(c *gin.Context) {
 	})
 }
 
-func GetUrl(c *gin.Context) {
+func GetFullUrl(c *gin.Context) {
 	appG := app.Gin{C: c}
 	urlHash := c.Param("urlHash")
 

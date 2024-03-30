@@ -10,12 +10,12 @@ import (
 )
 
 type Server struct {
-	Environment  string `env:"Environment" envDefault:"test"`
-	RunMode      string `env:"RUN_MODE" envDefault:"debug"`
-	HttpPort     int    `env:"PORT" envDefault:"8081"`
-	BaseUrl      string `env:"BASE_URL" envDefault:"http://localhost:8081/"`
-	ReadTimeout  time.Duration
-	WriteTimeout time.Duration
+	Environment  string        `env:"Environment" envDefault:"test"`
+	RunMode      string        `env:"RUN_MODE" envDefault:"debug"`
+	HttpPort     int           `env:"PORT" envDefault:"8081"`
+	BaseUrl      string        `env:"BASE_URL" envDefault:"http://localhost:8081/"`
+	ReadTimeout  time.Duration `env:"READ_TIMEOUT" envDefault:"10s"`
+	WriteTimeout time.Duration `env:"WRITE_TIMEOUT" envDefault:"10s"`
 }
 
 var ServerSetting = &Server{}
@@ -49,6 +49,9 @@ func Setup() {
 	loadEnv(ServerSetting)
 	loadEnv(SQLDatabaseSetting)
 	loadEnv(RedisSetting)
+
+	ServerSetting.ReadTimeout = ServerSetting.ReadTimeout * time.Second
+	ServerSetting.WriteTimeout = ServerSetting.WriteTimeout * time.Second
 }
 
 // mapTo map section
