@@ -3,7 +3,7 @@ module github.com/raighneweng/tinyurl-go
 go 1.22.1
 
 require (
-	github.com/beego/beego/v2 v2.3.4
+	github.com/beego/beego/v2 v2.3.6
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/fvbock/endless v0.0.0-20170109170031-447134032cb6
 	github.com/gin-gonic/gin v1.9.1
